@@ -5,19 +5,276 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Document</title>
+		<style>
+			/* html{
+				font-size: xx-large;
+			} */
+			body {
+				display: flex;
+				justify-content: center;
+			}
+			main {
+				display: flex;
+				justify-content: center;
+				flex-direction: column;
+			}
+			h1 {
+				text-align: center;
+			}
+
+			#typeHere {
+				width: 400px;
+				padding-top: 1em;
+				padding-bottom: 1em;
+				border: 1px solid lightgray;
+				font-size: 16px;
+				padding-left: 20px;
+			}
+			ul {
+				list-style-type: none;
+				padding-left: 0;
+				margin: 0;
+			}
+			ul > li {
+				border: 1px solid lightgrey;
+				border-top: none;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+			}
+			ul > li > p {
+				flex-grow: 1;
+			}
+			ul > li > span {
+				margin: 10px;
+				margin-right: 15px;
+			}
+
+			ul > li > input {
+				width: 25px;
+				height: 25px;
+				margin: 15px;
+			}
+
+			ul > li > input:checked ~ p {
+				text-decoration: line-through;
+				color: grey;
+			}
+			ul > li > span {
+				display: none;
+			}
+			ul > li:hover > span {
+				display: block;
+				cursor: pointer;
+			}
+
+			.bottomBar {
+				border: 1px solid lightgrey;
+				border-top: none;
+				padding: 5px 15px 5px 15px;
+				display: flex;
+				justify-content: space-between;
+				font-size: smaller;
+			}
+			.hidden {
+				display: none;
+			}
+			#bottomBar > div {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			#bottomBar > p {
+				cursor: default;
+			}
+			#bottomBar > #delete {
+				cursor: pointer;
+				/* margin: 5px */
+			}
+			#delete:hover {
+				text-decoration: underline;
+				color: red;
+			}
+			#bottomBar button {
+				height: 30px;
+				border: none;
+				margin: 2px;
+				cursor: pointer;
+			}
+			#bottomBar button:hover:not(.selectedButton) {
+				background-color: rgb(211, 242, 252);
+			}
+			.selectedButton {
+				background-color: lightblue;
+			}
+		</style>
 	</head>
 	<body>
-		<h1>Code Snippets</h1>
-		<ul>
-			<li>
-				<span>Example1</span>
-				<a href="/src/index1.html" target="_blank">index1</a>
-			</li>
-		</ul>
+		<main>
+			<h1>Things To Do</h1>
+			<div>
+				<input id="typeHere" type="text" placeholder="Enter your to do item" />
+
+				<ul id="list"></ul>
+
+				<div id="bottomBar" class="bottomBar hidden">
+					<p><span id="itemsLeft">0</span> items left</p>
+					<div>
+						<button id="all" class="selectedButton">All</button>
+						<button id="active">Active</button>
+						<button id="completed">Completed</button>
+					</div>
+
+					<p id="delete"><span></span>Clear Completed</p>
+				</div>
+			</div>
+		</main>
+
+		<script>
+			let all = {};
+			let completed = {};
+			let active = {};
+			let itemsLeft = document.getElementById("itemsLeft");
+			let items = 0;
+			let display = "all";
+			let bottomBar = document.getElementById("bottomBar");
+			function isEmpty(obj) {
+				for (var prop in obj) {
+					if (obj.hasOwnProperty(prop)) {
+						return false;
+					}
+				}
+
+				return JSON.stringify(obj) === JSON.stringify({});
+			}
+
+			let inputBar = document.getElementById("typeHere");
+			let tasks = document.getElementById("list");
+			inputBar.addEventListener("keydown", (e) => {
+				if (e.key === "Enter") {
+					
+					if (isEmpty(all)){
+						bottomBar.classList.toggle("hidden");
+					}
+					let v = e.target.value;
+					e.target.value = "";
+					let id = Date.now();
+
+					let checkbox = document.createElement("input");
+					checkbox.setAttribute("type", "checkbox");
+					checkbox.setAttribute("item", id);
+
+					let rowList = document.createElement("li");
+					rowList.append(checkbox);
+					let pElement = document.createElement("p");
+					pElement.innerHTML = v;
+					rowList.append(pElement);
+
+					let deleteButton = document.createElement("span");
+					deleteButton.innerHTML = "❌";
+					deleteButton.setAttribute("item", id);
+					rowList.appendChild(deleteButton);
+					if (display !== "completed") {
+						tasks.appendChild(rowList);
+					}
+
+					let row = [checkbox, v, rowList];
+
+					active[id] = row;
+					all[id] = row;
+					items++;
+					itemsLeft.innerHTML = items;
+				}
+			});
+
+			tasks.addEventListener("click", (e) => {
+				if (e.target.matches("input")) {
+					let id = e.target.getAttribute("item");
+					let isComplete = !e.target.checked; //because when we checked, it became the opposite of what we wanted
+					if (isComplete) {
+						//move to active
+						let row = completed[id];
+						delete completed[id];
+						active[id] = row;
+						if (display === "completed") {
+							tasks.removeChild(row[2]);
+						}
+						items++;
+					} else {
+						//move to complete
+						let row = active[id];
+						delete active[id];
+						completed[id] = row;
+						if (display === "active") {
+							tasks.removeChild(row[2]);
+						}
+						items--;
+					}
+					itemsLeft.innerHTML = items;
+				} else if (e.target.matches("span")) {
+					let id = e.target.getAttribute("item");
+					let isComplete = all[id][0].checked; // here negation is not used because it is the same as we want
+					let listRow = all[id][2];
+					console.log(isComplete);
+					if (isComplete) {
+						delete completed[id];
+						delete all[id];
+					} else {
+						delete active[id];
+						delete all[id];
+						items--;
+					}
+					tasks.removeChild(listRow);
+					itemsLeft.innerHTML = items;
+					if (isEmpty(all)){
+						bottomBar.classList.toggle("hidden");
+					}
+				}
+			});
+
+			bottomBar.addEventListener("click", (e) => {
+				if (e.target.id === "all" && display !== "all") {
+					document.getElementById(display).classList.toggle("selectedButton");
+					display = "all";
+					tasks.innerHTML = "";
+					for (let x in all) {
+						tasks.appendChild(all[x][2]);
+					}
+					e.target.classList.toggle("selectedButton");
+				} else if (e.target.id === "active" && display !== "active") {
+					document.getElementById(display).classList.toggle("selectedButton");
+					display = "active";
+					tasks.innerHTML = "";
+					let keys = Object.keys(active);
+					keys.sort();
+					for (let x of keys) {
+						tasks.appendChild(active[x][2]);
+					}
+					e.target.classList.toggle("selectedButton");
+				} else if (e.target.id === "completed" && display !== "completed") {
+					document.getElementById(display).classList.toggle("selectedButton");
+					display = "completed";
+					tasks.innerHTML = "";
+					let keys = Object.keys(completed);
+					keys.sort();
+					for (let x of keys) {
+						tasks.appendChild(completed[x][2]);
+					}
+					e.target.classList.toggle("selectedButton");
+				} else if (e.target.id === "delete") {
+					for (let x in completed) {
+						if (display !== "active") {
+							tasks.removeChild(completed[x][2]);
+						}
+						delete completed[x];
+						delete all[x];
+					}
+					if (isEmpty(all)){
+						bottomBar.classList.toggle("hidden");
+					}
+				}
+			});
+		</script>
 	</body>
-	<style>
-		html{
-			font-size: xx-large;
-		}
-	</style>
 </html>
