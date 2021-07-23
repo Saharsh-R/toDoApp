@@ -153,38 +153,39 @@
 			let tasks = document.getElementById("list");
 			inputBar.addEventListener("keydown", (e) => {
 				if (e.key === "Enter") {
-					
-					if (isEmpty(all)){
-						bottomBar.classList.toggle("hidden");
-					}
 					let v = e.target.value;
-					e.target.value = "";
-					let id = Date.now();
+					if (v !== "") {
+						if (isEmpty(all)) {
+							bottomBar.classList.toggle("hidden");
+						}
+						e.target.value = "";
+						let id = Date.now();
 
-					let checkbox = document.createElement("input");
-					checkbox.setAttribute("type", "checkbox");
-					checkbox.setAttribute("item", id);
+						let checkbox = document.createElement("input");
+						checkbox.setAttribute("type", "checkbox");
+						checkbox.setAttribute("item", id);
 
-					let rowList = document.createElement("li");
-					rowList.append(checkbox);
-					let pElement = document.createElement("p");
-					pElement.innerHTML = v;
-					rowList.append(pElement);
+						let rowList = document.createElement("li");
+						rowList.append(checkbox);
+						let pElement = document.createElement("p");
+						pElement.innerHTML = v;
+						rowList.append(pElement);
 
-					let deleteButton = document.createElement("span");
-					deleteButton.innerHTML = "❌";
-					deleteButton.setAttribute("item", id);
-					rowList.appendChild(deleteButton);
-					if (display !== "completed") {
-						tasks.appendChild(rowList);
+						let deleteButton = document.createElement("span");
+						deleteButton.innerHTML = "❌";
+						deleteButton.setAttribute("item", id);
+						rowList.appendChild(deleteButton);
+						if (display !== "completed") {
+							tasks.appendChild(rowList);
+						}
+
+						let row = [checkbox, v, rowList];
+
+						active[id] = row;
+						all[id] = row;
+						items++;
+						itemsLeft.innerHTML = items;
 					}
-
-					let row = [checkbox, v, rowList];
-
-					active[id] = row;
-					all[id] = row;
-					items++;
-					itemsLeft.innerHTML = items;
 				}
 			});
 
@@ -227,7 +228,7 @@
 					}
 					tasks.removeChild(listRow);
 					itemsLeft.innerHTML = items;
-					if (isEmpty(all)){
+					if (isEmpty(all)) {
 						bottomBar.classList.toggle("hidden");
 					}
 				}
@@ -270,7 +271,7 @@
 						delete completed[x];
 						delete all[x];
 					}
-					if (isEmpty(all)){
+					if (isEmpty(all)) {
 						bottomBar.classList.toggle("hidden");
 					}
 				}
