@@ -9,11 +9,16 @@
 			/* html{
 				font-size: xx-large;
 			} */
+			*{
+				box-sizing: border-box;
+			}
 			body {
 				display: flex;
 				justify-content: center;
 			}
 			main {
+				width: 400px;
+
 				display: flex;
 				justify-content: center;
 				flex-direction: column;
@@ -23,7 +28,7 @@
 			}
 
 			#typeHere {
-				width: 400px;
+				width: 100%;
 				padding-top: 1em;
 				padding-bottom: 1em;
 				border: 1px solid lightgray;
@@ -34,6 +39,7 @@
 				list-style-type: none;
 				padding-left: 0;
 				margin: 0;
+				width: 100%;
 			}
 			ul > li {
 				border: 1px solid lightgrey;
@@ -44,6 +50,8 @@
 			}
 			ul > li > p {
 				flex-grow: 1;
+				overflow: hidden;
+				text-overflow: ellipsis;
 			}
 			ul > li > span {
 				margin: 10px;
